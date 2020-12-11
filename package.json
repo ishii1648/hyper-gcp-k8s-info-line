@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marcjoha/hyper-gcp-status-line.git"
+    "url": "git+https://github.com/ishii1648/hyper-gcp-k8s-info-line.git"
   },
   "keywords": [
     "hyper",
