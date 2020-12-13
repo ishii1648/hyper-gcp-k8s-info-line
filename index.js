@@ -58,7 +58,7 @@ function setGcpProject() {
 }
 
 function setKubernetesContext() {
-    exec("kubectx -c", (error, stdout, stderr) => {
+    exec(configuration.kubectxBinary, (error, stdout, stderr) => {
         if (error) {
             state.kubernetesContext = 'n/a';
             return
