@@ -1,11 +1,11 @@
 const { shell } = require('electron');
-const { execFile, exec } = require('child_process');
+const { exec } = require('child_process');
 const color = require('color');
 const path = require('path');
 
 const configuration = {
     gcpConfigurePath: "~/.config/gcloud/configurations/config_default",
-    kubectlBinary: 'kubectl',
+    kubectxBinary: 'kubectx',
     devGCPProjects: []
 };
 
@@ -17,7 +17,6 @@ const state = {
 
 const productionColorScheme = {
     foregroundColor: '#ECF0F1', // athensGray
-    backgroundColor: '#1C2140', // midnightExpress
     borderColor: '#1C2140', // midnightExpress
     cursorColor: '#FF506C',
     colors: {
@@ -47,10 +46,6 @@ function setGcpProject() {
             state.gcpProject = 'n/a';
             return
         }
-        if (stdout.trim() == '') {
-            state.gcpProject = 'n/a';
-            return
-        }
 
         oldGcpProject = state.gcpProject
         project = stdout.split("=")[1].trim()
@@ -63,15 +58,12 @@ function setGcpProject() {
 }
 
 function setKubernetesContext() {
-    runCommand(configuration.kubectlBinary, ['config', 'current-context']).then(context => {
-        runCommand(configuration.kubectlBinary, ['config', 'view', '--minify', '--output', 'jsonpath={..namespace}']).then(namespace => {
-            state.kubernetesContext = context + ' (' + namespace + ')';
-        }).catch(() => {
-            state.kubernetesContext = context + ' (default)';
-        })
-    }).catch(error => {
-        console.log(error.message);
-        state.kubernetesContext = 'n/a';
+    exec("kubectx -c", (error, stdout, stderr) => {
+        if (error) {
+            state.kubernetesContext = 'n/a';
+            return
+        }
+        state.kubernetesContext = stdout;
     })
 }
 
@@ -80,25 +72,11 @@ function setConfiguration() {
     setKubernetesContext();
 }
 
-function runCommand(command, options) {
-    return new Promise((resolve, reject) => {
-        execFile(command, options, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            }
-            if (stdout.trim() == '') {
-                reject('stdout was empty');
-            }
-            resolve(stdout.trim());
-        })
-    })
-}
-
 exports.reduceUI = (state_, { type, config }) => {
     switch (type) {
         case 'CONFIG_LOAD':
-            if (config.hasOwnProperty('hyperGcpStatusLine')) {
-                Object.assign(configuration, config.hyperGcpStatusLine)
+            if (config.hasOwnProperty('hyperGcpKubernetesInfoLine')) {
+                Object.assign(configuration, config.hyperGcpKubernetesInfoLine)
             }
             let initialColorScheme = {}
             Object.keys(productionColorScheme).forEach((key) => {
@@ -106,8 +84,8 @@ exports.reduceUI = (state_, { type, config }) => {
             })
             return state_.set('initialColorScheme', initialColorScheme)
         case 'CONFIG_RELOAD': {
-            if (config.hasOwnProperty('hyperGcpStatusLine')) {
-                Object.assign(configuration, config.hyperGcpStatusLine)
+            if (config.hasOwnProperty('hyperGcpKubernetesInfoLine')) {
+                Object.assign(configuration, config.hyperGcpKubernetesInfoLine)
             }
             if (!config.hasOwnProperty('prdColorScheme')) {
                 return state_
