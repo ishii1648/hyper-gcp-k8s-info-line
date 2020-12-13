@@ -1,6 +1,6 @@
 {
   "name": "hyper-gcp-kubernetes-info-line",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A info line plugin for the Hyper terminal that shows information about the currently active GCP project and Kubernetes context.",
   "main": "index.js",
   "scripts": {
