@@ -1,11 +1,11 @@
 const { shell } = require('electron');
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const color = require('color');
 const path = require('path');
 
 const configuration = {
     gcpConfigurePath: "~/.config/gcloud/configurations/config_default",
-    kubectxBinary: 'kubectx',
+    kubectlBinary: 'kubectl',
     devGCPProjects: []
 };
 
@@ -58,18 +58,34 @@ function setGcpProject() {
 }
 
 function setKubernetesContext() {
-    exec(configuration.kubectxBinary, (error, stdout, stderr) => {
+    exec(configuration.kubectlBinary + " config current-context", (error, stdout, stderr) => {
         if (error) {
-            state.kubernetesContext = 'n/a';
+            state.kubernetesContext = 'n/a'
             return
         }
-        state.kubernetesContext = stdout;
+
+        console.log(stdout)
+        state.kubernetesContext = stdout.trim()
     })
 }
 
 function setConfiguration() {
     setGcpProject();
     setKubernetesContext();
+}
+
+function runCommand(command, options) {
+    return new Promise((resolve, reject) => {
+        execFile(command, options, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            }
+            if (stdout.trim() == '') {
+                reject('stdout was empty');
+            }
+            resolve(stdout.trim());
+        })
+    })
 }
 
 exports.reduceUI = (state_, { type, config }) => {
