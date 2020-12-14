@@ -1,5 +1,4 @@
-const { shell } = require('electron');
-const { exec, execFile } = require('child_process');
+const { exec } = require('child_process');
 const color = require('color');
 const path = require('path');
 
@@ -72,20 +71,6 @@ function setKubernetesContext() {
 function setConfiguration() {
     setGcpProject();
     setKubernetesContext();
-}
-
-function runCommand(command, options) {
-    return new Promise((resolve, reject) => {
-        execFile(command, options, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            }
-            if (stdout.trim() == '') {
-                reject('stdout was empty');
-            }
-            resolve(stdout.trim());
-        })
-    })
 }
 
 exports.reduceUI = (state_, { type, config }) => {
@@ -172,11 +157,6 @@ exports.decorateHyper = (Hyper, { React, notify }) => {
         constructor(props) {
             super(props);
             this.state = {};
-            this.handleClick = this.handleClick.bind(this);
-        }
-
-        handleClick(event) {
-            shell.openExternal(configuration.gcpStatusUrl);
         }
 
         render() {
@@ -203,7 +183,6 @@ exports.decorateHyper = (Hyper, { React, notify }) => {
 
         componentWillUnmount() {
             clearInterval(this.repaintInterval);
-            clearInterval(this.pollGcpStatusInterval);
         }
     };
 }
