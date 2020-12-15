@@ -11,14 +11,8 @@ hyper-gcp-k8s-info-line is omit some function and change internal processing for
 
 ## Installation
 
-Add the following to your `~/.hyper.js` config:
-
-```javascript
-module.exports = {
-  ...
-  plugins: ["hyper-gcp-kubernetes-info-line"]
-  ...
-}
+```
+$ hyper i hyper-gcp-kubernetes-info-line
 ```
 
 ## Configuration
